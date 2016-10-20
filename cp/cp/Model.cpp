@@ -5,7 +5,8 @@ namespace cp
 
 IntVariable::IntVariable(const int id, const int * values, const int size) :
 	Base(id),
-	size_(size)
+	size_(size),
+	cur_size_(size)
 {
 	vals_ = new int[size];
 	absent_ = new int[size];
@@ -21,6 +22,11 @@ IntVariable::IntVariable(const int id, const int * values, const int size) :
 		prev_[i] = i - 1;
 		prev_absent_[i] = -1;
 	}
+
+	next_[size_ - 1] = -1;
+	prev_[0] = -1;
+	tail_ = size_ - 1;
+	lmt_ = vals_[size_ - 1];
 }
 
 IntVariable::~IntVariable()
@@ -53,6 +59,7 @@ void IntVariable::RemoveValue(const int a, const int p)
 void IntVariable::ReduceTo(const int a, const int p)
 {
 	int b = head_;
+	assigned_ = true;
 
 	while (b != -1)
 	{
@@ -74,6 +81,7 @@ void IntVariable::AddValue(const int a)
 void IntVariable::RestoreUpTo(const int p)
 {
 	int b = tail_absent_;
+	assigned_ = false;
 
 	while (b != -1 && absent_[b] >= p)
 	{
@@ -96,7 +104,7 @@ int* IntVariable::next()
 
 int* IntVariable::end()
 {
-	return ptr_ = &tail_;
+	return &tail_;
 }
 
 int IntVariable::GetValueByIndex(const int idx) const
@@ -116,7 +124,7 @@ int IntVariable::capacity() const
 
 int IntVariable::assigned() const
 {
-	return cur_size_ == 1;
+	return assigned_;
 }
 
 int IntVariable::next(int a) const
@@ -144,21 +152,36 @@ int IntVariable::tail()const
 	return tail_;
 }
 
-void Constraint::GetFirstValidTuple(v_value_int & v_a, IntTuple & t)
+bool IntVariable::faild() const
 {
-	int i = 0;
-	for (IntVariable* v : scope_)
-	{
-		if (v != v_a.v())
-			t[i] = v_a.v()->head();
-		else
-			t[i] = v_a.a();
-
-		++i;
-	}
+	return cur_size_ == 1;
 }
 
-Tabular::Tabular(const int id, const std::vector<IntVariable*>& scope, const int ** const ts, const int len) :
+void Constraint::GetFirstValidTuple(v_value_int & v_a, IntTuple & t)
+{
+	for (size_t i = 0; i < arity_; ++i)
+		if (scope_[i] != v_a.v())
+			t[i] = scope_[i]->head();
+		else
+			t[i] = v_a.a();
+}
+
+void Constraint::GetNextValidTuple(v_value_int& v_a, IntTuple&t)
+{
+	for (int i = arity_ - 1; i >= 0; --i)
+		if (scope_[i] != v_a.v())
+			if (scope_[i]->next(t[i]) == -1)
+				t[i] = scope_[i]->head();
+			else
+			{
+				t[i] = scope_[i]->next(t[i]);
+				return;
+			}
+
+	t.exclude();
+}
+
+Tabular::Tabular(const int id, const std::vector<IntVariable*>& scope, int **  ts, const int len) :
 	Constraint(id, scope, CT_EXT)
 {
 	for (int i = 0; i < len; ++i)
@@ -176,7 +199,7 @@ void Network::MakeVar(const int id, const int * values, const int size)
 	vars_.push_back(v);
 }
 
-void Network::MakeTab(const int id, const std::vector<IntVariable *>& scope, const int** const ts, const int len)
+void Network::MakeTab(const int id, const std::vector<IntVariable *>& scope, int** ts, const int len)
 {
 	Tabular* tb = new Tabular(id, scope, ts, len);
 	cons_.push_back(tb);
@@ -185,5 +208,25 @@ void Network::MakeTab(const int id, const std::vector<IntVariable *>& scope, con
 		v->subscribe(tb);
 }
 
+void Network::GetFirstValidTuple(c_value_int & c_val, IntTuple& t)
+{
+	v_value_int v_a(c_val.v(), c_val.a());
+	c_val.c()->GetFirstValidTuple(v_a, t);
+}
+
+void Network::GetNextValidTuple(c_value_int & c_val, IntTuple& t)
+{
+	v_value_int v_a(c_val.v(), c_val.a());
+	c_val.c()->GetNextValidTuple(v_a, t);
+}
+
+const cp::c_value_int& c_value_int::operator=(const c_value_int& rhs)
+{
+	c_ = rhs.c_;
+	v_ = rhs.v_;
+	a_ = rhs.a_;
+
+	return *this;
+}
 
 }/*namespace cp*/

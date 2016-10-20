@@ -33,7 +33,7 @@ protected:
 class arc_que
 {
 public:
-#define  have(a) vid_set_[a.c_id()*arity_+a.c()->index(a.v())]
+#define  have(a) vid_set_[a.c_id() * arity_ + a.c()->index(a.v())]
 	arc_que() {}
 	arc_que(const int cons_size, const int max_arity);
 	virtual ~arc_que();
@@ -59,17 +59,16 @@ public:
 	AC() {}
 	AC(Network *nt);
 	virtual ~AC() {}
-	virtual bool EnforceGAC_arc(VarEvt& evt, const int level) = 0;
-	virtual bool Revise(arc &c_x) = 0;
-	virtual bool SeekSupport(c_value_int& c_val) = 0;
+	virtual bool EnforceGAC_arc(const int level) = 0;
 	int DeletedCount();
-
-	arc_que Q;
 
 	int lvl() const { return lvl_; }
 	void lvl(int val) { lvl_ = val; }
 
 protected:
+
+	virtual bool revise(arc &c_x) = 0;
+	virtual bool seek_support(c_value_int& c_val) = 0;
 	Network* nt_;
 	int delete_count = 0;
 	int lvl_;

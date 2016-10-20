@@ -14,7 +14,7 @@ VarEvt::VarEvt(Network *nt)
 
 arc_que::arc_que(const int cons_size, const int max_arity) :
 	arity_(max_arity),
-	m_size_(max_arity*cons_size),
+	m_size_(max_arity*cons_size + 1),
 	m_front_(0),
 	m_rear_(0)
 {
@@ -28,12 +28,13 @@ arc_que::~arc_que()
 	delete[] vid_set_;
 	m_data_ = NULL;
 	vid_set_ = NULL;
+	arity_ = 0;
 }
 
 void arc_que::MakeQue(const size_t cons_size, const size_t max_arity)
 {
 	arity_ = max_arity;
-	m_size_ = max_arity*cons_size;
+	m_size_ = max_arity*cons_size + 1;
 	m_front_ = 0;
 	m_rear_ = 0;
 
@@ -56,11 +57,12 @@ bool arc_que::push(arc& ele) throw(std::bad_exception)
 	if (full())
 		throw std::bad_exception();
 
-	if (!have(ele))
+	if (have(ele))
 		return false;
 
 	m_data_[m_rear_] = ele;
 	m_rear_ = (m_rear_ + 1) % m_size_;
+	have(ele) = 1;
 
 	return true;
 }
@@ -77,10 +79,10 @@ arc arc_que::pop() throw(std::bad_exception)
 	return tmp;
 }
 
-AC::AC(Network *nt):
+AC::AC(Network *nt) :
 	nt_(nt)
 {
-	
+
 }
 
 int AC::DeletedCount()
