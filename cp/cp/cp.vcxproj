@@ -144,13 +144,19 @@
   <ItemGroup>
     <ClCompile Include="AC3.cpp" />
     <ClCompile Include="CPAlgorithm.cpp" />
+    <ClCompile Include="GAC.cpp" />
+    <ClCompile Include="MAC.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="pro_que.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AC3.h" />
     <ClInclude Include="CPAlgorithm.h" />
+    <ClInclude Include="GAC.h" />
+    <ClInclude Include="MAC.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="pro_que.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

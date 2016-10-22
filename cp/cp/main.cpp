@@ -39,13 +39,14 @@ int main()
 	tuple1[2][0] = 1;
 	tuple1[2][1] = 2;
 
-	vector<IntVariable*> scp0 = { nt->vars_[0],nt->vars_[1] };
-	vector<IntVariable*> scp1 = { nt->vars_[1],nt->vars_[2] };
-
+	vector<IntVar*> scp0 = { nt->vars_[0],nt->vars_[1] };
+	vector<IntVar*> scp1 = { nt->vars_[1],nt->vars_[2] };
 	nt->MakeTab(0, scp0, tuple0, 3);
 	nt->MakeTab(1, scp1, tuple1, 3);
+	VarEvt* x_evt;
+	x_evt = new VarEvt(nt);
 	AC3* ac3 = new AC3(nt);
-	ac3->EnforceGAC_arc();
+	ac3->EnforceGAC_arc(x_evt);
 
 	for (int i = 0; i < 3; ++i)
 	{
@@ -59,8 +60,8 @@ int main()
 		tuple1[i] = NULL;
 	}
 
+	delete x_evt;
 	delete ac3;
-
 	delete nt;
 
 	return 0;

@@ -27,6 +27,15 @@
     <ClCompile Include="Model.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="pro_que.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GAC.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MAC.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h">
@@ -36,6 +45,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CPAlgorithm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="pro_que.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GAC.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MAC.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

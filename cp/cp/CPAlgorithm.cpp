@@ -3,13 +3,78 @@
 namespace cp
 {
 
-VarEvt::VarEvt(const VarEvt& ve) :
-	sig_(std::vector <unsigned>(ve.sig_))
-{}
+//VarEvt::VarEvt(const VarEvt& ve) :
+//	sig_(std::vector <unsigned>(ve.sig_))
+//{}
+//
+//VarEvt::VarEvt(Network *nt)
+//{
+//	sig_.resize(nt->vars_size(), 1);
+//}
 
-VarEvt::VarEvt(Network *nt)
+//template<Network* nt_>
+//VarEvt<v>::VarEvt():size_(nt_->vars_size()),cur_size_(nt_->vars_size())
+//{
+//
+//}
+//template<Network * nt_>
+//inline VarEvt<nt_>::VarEvt() :
+//	size_(nt_->vars_size()),
+//	cur_size_(nt_->vars_size())
+//{
+//	vars_ = new IntVar*[size_];
+//}
+//
+//template<Network * nt_>
+//VarEvt<nt_>::~VarEvt()
+//{
+//	delete[] vars_;
+//	delete vars_;
+//}
+
+//
+//template<IntVar * v>
+//VarEvt<v>::~VarEvt()
+//{
+//}
+VarEvt::VarEvt(Network* nt_) :
+	size_(nt_->vars_size()),
+	cur_size_(0)
 {
-	sig_.resize(nt->vars_size(), 1);
+	vars_ = new IntVar*[size_];
+	for (IntVar* v : nt_->vars_)
+		push_back(v);
+}
+
+IntVar* VarEvt::operator[](const int i)
+{
+	return vars_[i];
+}
+
+int VarEvt::size() const
+{
+	return cur_size_;
+}
+
+cp::IntVar* VarEvt::at(const int i)
+{
+	return vars_[i];
+}
+
+VarEvt::~VarEvt()
+{
+	delete[] vars_;
+}
+
+void cp::VarEvt::push_back(IntVar* v)
+{
+	vars_[cur_size_] = v;
+	++cur_size_;
+}
+
+void cp::VarEvt::clear()
+{
+	cur_size_ = 0;
 }
 
 arc_que::arc_que(const int cons_size, const int max_arity) :
@@ -79,20 +144,56 @@ arc arc_que::pop() throw(std::bad_exception)
 	return tmp;
 }
 
-AC::AC(Network *nt) :
-	nt_(nt)
+AssignedStack::AssignedStack(Network * nt) :
+	nt_(nt),
+	size_(nt_->vars_size())
 {
-
+	vars_ = new IntVar*[size_];
+	a_ = new int[size_];
 }
 
-int AC::DeletedCount()
+AssignedStack::~AssignedStack()
 {
-	int count = 0;
+	delete[] vars_;
+	delete[] a_;
+}
 
-	for (IntVariable* v : nt_->vars_)
-		count += (v->capacity() - v->size());
+void AssignedStack::push(v_value_int & v_a)
+{
+	vars_[lvl_] = v_a.v();
+	a_[lvl_] = v_a.a();
+	++lvl_;
+}
 
-	return count;
+v_value_int AssignedStack::pop()
+{
+	--lvl_;
+	v_value_int v_a(vars_[lvl_], a_[lvl_]);
+	return v_a;
+}
+
+v_value_int AssignedStack::top() const
+{
+	return v_value_int(vars_[lvl_], a_[lvl_]);
+}
+
+v_value_int AssignedStack::operator[](const int i) const
+{
+	return v_value_int(vars_[i], a_[i]);
+}
+
+v_value_int AssignedStack::at(const int i) const
+{
+	return v_value_int(vars_[i], a_[i]);
+}
+
+std::ostream & operator<<(std::ostream & os, AssignedStack & I)
+{
+	for (int i = 0; i < I.size(); ++i)
+		os << I[i] << "\t";
+	os << std::endl;
+
+	return os;
 }
 
 }

@@ -2,6 +2,7 @@
 
 namespace cp
 {
+
 AC3::AC3(Network *nt) :
 	AC(nt)
 {
@@ -9,16 +10,23 @@ AC3::AC3(Network *nt) :
 	cur_tp_.reserve(nt_->max_arity());
 }
 
-bool AC3::EnforceGAC_arc(const int level)
+
+bool AC3::EnforceGAC_arc(VarEvt* x_evt, const int level)
 {
 	lvl(level);
 	delete_count = 0;
 	arc c_x;
 
-	for (Constraint* c : nt_->cons_)
-		for (IntVariable* v : c->scope())
-			if ((!v->assigned()) && v->propagated())
-				Q.push(arc(c, v));
+	for (int i = 0; i < x_evt->size(); ++i)
+		for (Constraint* c : x_evt->at(i)->subscribe())
+			for (IntVar* x : c->scope())
+				if (x != x_evt->at(i))
+					Q.push(arc(c, x));
+
+	//for (Constraint* c : nt_->cons_)
+	//	for (IntVar* v : c->scope())
+	//		if ((!v->assigned()) && v->propagated(lvl_))
+	//			Q.push(arc(c, v));
 
 	while (!Q.empty())
 	{
@@ -32,7 +40,7 @@ bool AC3::EnforceGAC_arc(const int level)
 
 			for (Constraint* c : c_x.v()->subscribe())
 				if (c != c_x.c())
-					for (IntVariable* v : c->scope())
+					for (IntVar* v : c->scope())
 						if ((v != c_x.v()) && (!v->assigned()))
 							Q.push(arc(c, v));
 		}

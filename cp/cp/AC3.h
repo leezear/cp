@@ -1,16 +1,19 @@
 #pragma once
 #include "CPAlgorithm.h"
 
+
 namespace cp {
+
 class AC3 :public AC
 {
 public:
 	AC3(Network *nt);
 	virtual ~AC3() {}
-	virtual bool EnforceGAC_arc(const int level = 0);
+	virtual bool EnforceGAC_arc(VarEvt* x_evt, const int level = 0);
 
 protected:
 	arc_que Q;
+	//pro_que<T> q;
 	virtual bool revise(arc& c_x);
 	virtual bool seek_support(c_value_int& c_val);
 private:

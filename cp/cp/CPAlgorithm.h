@@ -2,31 +2,55 @@
 #pragma warning (disable:4290)
 
 #include "Model.h"
+#include "pro_que.h"
+
 namespace cp
 {
+
+//class VarEvt
+//{
+//public:
+//	VarEvt(const VarEvt& ve);
+//	VarEvt(Network *nt);
+//
+//	bool Assigned(IntVar* const v) const { return (sig_[v->id()] & 0x80000000) != 0; }
+//	bool Assigned(const int idx) const { return (sig_[idx] & 0x80000000) != 0; }
+//	void Assign(const int idx) { sig_[idx] |= 0x80000000; }
+//	void Assign(IntVar* const v) { sig_[v->id()] |= 0x80000000; }
+//	void Modi(const int idx) { sig_[idx] |= 1; }
+//	void Modi(IntVar* const v) { sig_[v->id()] |= 1; }
+//	bool NeedModi(const int idx) const { return (sig_[idx] & 1) != 0; }
+//	bool NeedModi(IntVar* const v) const { return (sig_[v->id()] & 1) != 0; }
+//protected:
+//	//////////////////////////////////////////////////////////////////////////
+//	//1xxx	变量已赋值
+//	//0xxx	变量未赋值
+//	//xxx1  【主线程】变量需要传播
+//	//xxx0	【主线程】变量不需要传播
+//	//////////////////////////////////////////////////////////////////////////
+//	std::vector<unsigned> sig_;
+//};
+
+enum ACAlgorithm {
+	AC_1, AC_2, AC_3, AC_4, AC_6, AC_7, AC_2001, AC_3rm, STR_1, STR_2, STR_3
+};
 
 class VarEvt
 {
 public:
-	VarEvt(const VarEvt& ve);
-	VarEvt(Network *nt);
+	VarEvt(Network* nt_);
+	virtual ~VarEvt();
 
-	bool Assigned(IntVariable* const v) const { return (sig_[v->id()] & 0x80000000) != 0; }
-	bool Assigned(const int idx) const { return (sig_[idx] & 0x80000000) != 0; }
-	void Assign(const int idx) { sig_[idx] |= 0x80000000; }
-	void Assign(IntVariable* const v) { sig_[v->id()] |= 0x80000000; }
-	void Modi(const int idx) { sig_[idx] |= 1; }
-	void Modi(IntVariable* const v) { sig_[v->id()] |= 1; }
-	bool NeedModi(const int idx) const { return (sig_[idx] & 1) != 0; }
-	bool NeedModi(IntVariable* const v) const { return (sig_[v->id()] & 1) != 0; }
-protected:
-	//////////////////////////////////////////////////////////////////////////
-	//1xxx	变量已赋值
-	//0xxx	变量未赋值
-	//xxx1  【主线程】变量需要传播
-	//xxx0	【主线程】变量不需要传播
-	//////////////////////////////////////////////////////////////////////////
-	std::vector<unsigned> sig_;
+	IntVar* operator[](const int i);
+	void push_back(IntVar* v);
+	void clear();
+	int size() const;
+	IntVar* at(const int i);
+
+private:
+	IntVar** vars_;
+	int size_;
+	int cur_size_;
 };
 
 
@@ -53,28 +77,63 @@ private:
 	int m_rear_;
 };
 
+class AssignedStack
+{
+public:
+	AssignedStack(Network *nt);
+	virtual ~AssignedStack();
+
+	void push(v_value_int& v_a);
+	v_value_int pop();
+	v_value_int top() const;
+	int size() const { return lvl_ + 1; }
+	int capacity() const { return size_; }
+	bool full() const { return (lvl_ - size_) == 1; }
+	v_value_int operator[](const int i) const;
+	v_value_int at(const int i) const;
+	friend std::ostream& operator<< (std::ostream &os, AssignedStack &I);
+private:
+	Network *nt_;
+	IntVar** vars_;
+	int* a_;
+	int lvl_ = 0;
+	int size_;
+};
+
+
 class AC
 {
 public:
 	AC() {}
-	AC(Network *nt);
+	AC(Network *nt) : nt_(nt) {}
 	virtual ~AC() {}
-	virtual bool EnforceGAC_arc(const int level) = 0;
-	int DeletedCount();
+	virtual bool EnforceGAC_arc(VarEvt* x_evt, const int level = 0) = 0;
+
+	int DeletedCount()
+	{
+		int count = 0;
+		for (IntVar* v : nt_->vars_)
+			count += (v->capacity() - v->size());
+		return count;
+	}
+
 
 	int lvl() const { return lvl_; }
 	void lvl(int val) { lvl_ = val; }
 
 protected:
 
-	virtual bool revise(arc &c_x) = 0;
-	virtual bool seek_support(c_value_int& c_val) = 0;
+	//virtual bool revise(arc &c_x) = 0;
+	//virtual bool seek_support(c_value_int& c_val) = 0;
 	Network* nt_;
 	int delete_count = 0;
 	int lvl_;
 };
 
+
 }
+
+
 
 //class arc_que
 //{

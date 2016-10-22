@@ -39,16 +39,13 @@ private:
 class Constraint;
 class v_value_int;
 
-class IntVariable :public Base
+class IntVar :public Base
 {
 public:
-	IntVariable() {};
-	IntVariable(const int id) :Base(id) {}
-	//IntVariable(const int id, const int min, const int interval, const int size);
-	//IntVariable(const int id, const int min, const int max);
-	//IntVariable(const int id, std::vector<int> const &values);
-	IntVariable(const int id, const int *values, const int size);
-	virtual ~IntVariable();
+	IntVar() {};
+	IntVar(const int id) :Base(id) {}
+	IntVar(const int id, const int *values, const int size);
+	virtual ~IntVar();
 
 	void RemoveValue(const int a, const int p = 0);
 	void ReduceTo(const int a, const int p = 0);
@@ -71,8 +68,11 @@ public:
 	std::vector<Constraint *>& subscribe() { return cs_; }
 	void subscribe(Constraint* c) { cs_.push_back(c); }
 
-	int propagated() const { return propagated_; }
-	void propagated(int val) { propagated_ = val; }
+	bool propagated(const int level) const { return (level == propagated_); }
+	int stamp() const { return stamp_; }
+	void stamp(int val) { stamp_ = val; }
+	//int propagated() const { return propagated_; }
+	//void propagated(int val) { propagated_ = val; }
 private:
 	int* vals_;
 
@@ -91,8 +91,8 @@ private:
 	bool assigned_ = false;
 	int* ptr_;
 	int lmt_;
-	int propagated_ = 1;
-
+	int propagated_ = 0;
+	int stamp_;
 	std::vector<Constraint* > cs_;
 
 	//IntVariableType type_;
@@ -348,19 +348,19 @@ class Constraint :public Base
 public:
 	Constraint() {}
 	Constraint(const int id) :Base(id) {}
-	Constraint(const int id, const std::vector<IntVariable *>& scope, const ConstraintType type) :
+	Constraint(const int id, const std::vector<IntVar *>& scope, const ConstraintType type) :
 		Base(id),
 		scope_(scope),
 		type_(type),
 		arity_(scope.size()) {}
 	virtual bool sat(IntTuple &t) = 0;
 
-	std::vector<IntVariable *>& scope()
+	std::vector<IntVar *>& scope()
 	{
 		return scope_;
 	}
 
-	int index(IntVariable* v) const
+	int index(IntVar* v) const
 	{
 		for (int i = scope_.size() - 1; i >= 0; --i)
 			if (scope_[i]->id() == v->id())
@@ -375,7 +375,7 @@ public:
 	virtual ~Constraint() {}
 protected:
 	size_t arity_;
-	std::vector<IntVariable *>scope_;
+	std::vector<IntVar *>scope_;
 	ConstraintType type_;
 };
 
@@ -383,7 +383,7 @@ class Tabular :public Constraint
 {
 public:
 	Tabular() {}
-	Tabular(const int id, const std::vector<IntVariable *>& scope, int**  ts, const int len);
+	Tabular(const int id, const std::vector<IntVar *>& scope, int**  ts, const int len);
 	virtual bool sat(IntTuple &t) override;
 	virtual ~Tabular() {}
 
@@ -395,7 +395,7 @@ class arc
 {
 public:
 	arc() {}
-	arc(Constraint* c, IntVariable* v) :c_(c), v_(v) {}
+	arc(Constraint* c, IntVar* v) :c_(c), v_(v) {}
 	virtual ~arc() {}
 
 	Constraint* c() const { return c_; }
@@ -418,27 +418,28 @@ public:
 		return os;
 	}
 
-	IntVariable* v() const { return v_; }
-	void v(IntVariable* val) { v_ = val; }
+	IntVar* v() const { return v_; }
+	void v(IntVar* val) { v_ = val; }
 private:
 	Constraint* c_;
-	IntVariable* v_;
+	IntVar* v_;
 };
 
 class v_value_int
 {
 public:
 	v_value_int() {}
-	v_value_int(IntVariable *v, const int a) :v_(v), a_(a) {}
+	v_value_int(IntVar *v, const int a) :v_(v), a_(a) {}
 	~v_value_int() {}
 
-	IntVariable* v() const { return v_; }
-	void v(IntVariable* val) { v_ = val; }
+	IntVar* v() const { return v_; }
+	void v(IntVar* val) { v_ = val; }
 
 	int a() const { return a_; }
 	void a(int val) { a_ = val; }
+	friend std::ostream& operator<< (std::ostream &os, v_value_int &v_val);
 private:
-	IntVariable* v_;
+	IntVar* v_;
 	int a_;
 };
 
@@ -446,7 +447,7 @@ class c_value_int
 {
 public:
 	c_value_int() {}
-	c_value_int(Constraint* c, IntVariable *v, const  int a) : c_(c), v_(v), a_(a) {}
+	c_value_int(Constraint* c, IntVar *v, const  int a) : c_(c), v_(v), a_(a) {}
 	c_value_int(Constraint* c, v_value_int& va) :c_(c), v_(va.v()), a_(va.a()) {}
 	c_value_int(arc& rc, const int a) :c_(rc.c()), v_(rc.v()), a_(a) {}
 
@@ -456,8 +457,8 @@ public:
 	void c(Constraint* c) { c_ = c; }
 
 
-	cp::IntVariable* v() const { return v_; }
-	void v(cp::IntVariable* val) { v_ = val; }
+	cp::IntVar* v() const { return v_; }
+	void v(cp::IntVar* val) { v_ = val; }
 
 	int a() const { return a_; }
 	void a(int val) { a_ = val; }
@@ -469,13 +470,13 @@ public:
 
 	friend std::ostream& operator<< (std::ostream &os, c_value_int &c_val)
 	{
-		os << "(" << c_val.c_->id() << ", " << c_val.v_->id() << ", " << c_val.a_ << ")" << std::endl;
+		os << "(" << c_val.c_->id() << ", " << c_val.v_->id() << ", " << c_val.a_ << ")";
 		return os;
 	}
 
 private:
 	Constraint* c_;
-	IntVariable* v_;
+	IntVar* v_;
 	int a_;
 };
 
@@ -487,7 +488,7 @@ public:
 	virtual ~Network() {}
 
 	void MakeVar(const int id, const int *values, const int size);
-	void MakeTab(const int id, const std::vector<IntVariable *>& scope, int** ts, const int len);
+	void MakeTab(const int id, const std::vector<IntVar *>& scope, int** ts, const int len);
 
 	size_t vars_size() { return vars_.size(); }
 	size_t cons_size() { return cons_.size(); }
@@ -495,7 +496,7 @@ public:
 	void GetFirstValidTuple(c_value_int & c_val, IntTuple& t);
 	void GetNextValidTuple(c_value_int & c_val, IntTuple& t);
 
-	std::vector<IntVariable*> vars_;
+	std::vector<IntVar*> vars_;
 	std::vector<Constraint*> cons_;
 
 	size_t max_arity() const { return max_arity_; }

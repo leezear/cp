@@ -3,7 +3,7 @@
 namespace cp
 {
 
-IntVariable::IntVariable(const int id, const int * values, const int size) :
+IntVar::IntVar(const int id, const int * values, const int size) :
 	Base(id),
 	size_(size),
 	cur_size_(size)
@@ -29,7 +29,7 @@ IntVariable::IntVariable(const int id, const int * values, const int size) :
 	lmt_ = vals_[size_ - 1];
 }
 
-IntVariable::~IntVariable()
+IntVar::~IntVar()
 {
 	delete[] vals_;
 	delete[] absent_;
@@ -45,7 +45,7 @@ IntVariable::~IntVariable()
 
 }
 
-void IntVariable::RemoveValue(const int a, const int p)
+void IntVar::RemoveValue(const int a, const int p)
 {
 	--cur_size_;
 	absent_[a] = p;
@@ -56,7 +56,7 @@ void IntVariable::RemoveValue(const int a, const int p)
 	(next_[a] == -1) ? tail_ = prev_[a] : prev_[next_[a]] = prev_[a];
 }
 
-void IntVariable::ReduceTo(const int a, const int p)
+void IntVar::ReduceTo(const int a, const int p)
 {
 	int b = head_;
 	assigned_ = true;
@@ -69,7 +69,7 @@ void IntVariable::ReduceTo(const int a, const int p)
 	}
 }
 
-void IntVariable::AddValue(const int a)
+void IntVar::AddValue(const int a)
 {
 	absent_[a] = -1;
 	tail_absent_ = prev_absent_[a];
@@ -78,10 +78,11 @@ void IntVariable::AddValue(const int a)
 	(next_[a] == -1) ? tail_ = a : prev_[next_[a]] = a;
 }
 
-void IntVariable::RestoreUpTo(const int p)
+void IntVar::RestoreUpTo(const int p)
 {
 	int b = tail_absent_;
 	assigned_ = false;
+	propagated_ = p - 1;
 
 	while (b != -1 && absent_[b] >= p)
 	{
@@ -90,69 +91,69 @@ void IntVariable::RestoreUpTo(const int p)
 	}
 }
 
-int* IntVariable::begin()
+int* IntVar::begin()
 {
 	ptr_ = &head_;
 	return ptr_;
 }
 
-int* IntVariable::next()
+int* IntVar::next()
 {
 	ptr_ = &next_[*ptr_];
 	return ptr_;
 }
 
-int* IntVariable::end()
+int* IntVar::end()
 {
 	return &tail_;
 }
 
-int IntVariable::GetValueByIndex(const int idx) const
+int IntVar::GetValueByIndex(const int idx) const
 {
 	return vals_[idx];
 }
 
-int IntVariable::size() const
+int IntVar::size() const
 {
 	return cur_size_;
 }
 
-int IntVariable::capacity() const
+int IntVar::capacity() const
 {
 	return size_;
 }
 
-int IntVariable::assigned() const
+int IntVar::assigned() const
 {
 	return assigned_;
 }
 
-int IntVariable::next(int a) const
+int IntVar::next(int a) const
 {
 	return next_[a];
 }
 
-int IntVariable::prev(int a) const
+int IntVar::prev(int a) const
 {
 	return prev_[a];
 }
 
-bool IntVariable::have(int a) const
+bool IntVar::have(int a) const
 {
 	return absent_[a] == -1;
 }
 
-int IntVariable::head() const
+int IntVar::head() const
 {
 	return head_;
 }
 
-int IntVariable::tail()const
+int IntVar::tail()const
 {
 	return tail_;
 }
 
-bool IntVariable::faild() const
+bool IntVar::faild() const
 {
 	return cur_size_ == 1;
 }
@@ -181,7 +182,7 @@ void Constraint::GetNextValidTuple(v_value_int& v_a, IntTuple&t)
 	t.exclude();
 }
 
-Tabular::Tabular(const int id, const std::vector<IntVariable*>& scope, int **  ts, const int len) :
+Tabular::Tabular(const int id, const std::vector<IntVar*>& scope, int **  ts, const int len) :
 	Constraint(id, scope, CT_EXT)
 {
 	for (int i = 0; i < len; ++i)
@@ -195,16 +196,16 @@ bool Tabular::sat(IntTuple &t)
 
 void Network::MakeVar(const int id, const int * values, const int size)
 {
-	IntVariable* v = new IntVariable(id, values, size);
+	IntVar* v = new IntVar(id, values, size);
 	vars_.push_back(v);
 }
 
-void Network::MakeTab(const int id, const std::vector<IntVariable *>& scope, int** ts, const int len)
+void Network::MakeTab(const int id, const std::vector<IntVar *>& scope, int** ts, const int len)
 {
 	Tabular* tb = new Tabular(id, scope, ts, len);
 	cons_.push_back(tb);
 
-	for (IntVariable* v : scope)
+	for (IntVar* v : scope)
 		v->subscribe(tb);
 }
 
@@ -227,6 +228,12 @@ const cp::c_value_int& c_value_int::operator=(const c_value_int& rhs)
 	a_ = rhs.a_;
 
 	return *this;
+}
+
+std::ostream & operator<<(std::ostream & os, v_value_int & v_val)
+{
+	os << "(" << v_val.v_->id() << ", " << v_val.a_ << ")";
+	return os;
 }
 
 }/*namespace cp*/
