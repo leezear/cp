@@ -484,6 +484,7 @@ private:
 class Network
 {
 public:
+	Network() {}
 	Network(const int max_arity) :max_arity_(max_arity) {}
 
 	virtual ~Network() {}

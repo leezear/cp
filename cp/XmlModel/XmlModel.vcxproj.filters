@@ -15,46 +15,28 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClInclude Include="XMLModel.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="type_define.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="XMLBuilder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildModel.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="XMLBuilder.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="AC3.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CPAlgorithm.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="pro_que.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="GAC.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MAC.cpp">
+    <ClCompile Include="XMLModel.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Model.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="AC3.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CPAlgorithm.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="pro_que.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="GAC.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="MAC.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
+    <None Include="xerces-c_3_1.dll" />
   </ItemGroup>
 </Project>
