@@ -86,12 +86,14 @@ public:
 	void push(v_value_int& v_a);
 	v_value_int pop();
 	v_value_int top() const;
-	int size() const { return lvl_ + 1; }
+	int size() const { return lvl_; }
 	int capacity() const { return size_; }
-	bool full() const { return (lvl_ - size_) == 1; }
+	bool full() const { return lvl_ == size_; }
+	bool empty() const { return lvl_ == 0; }
 	v_value_int operator[](const int i) const;
 	v_value_int at(const int i) const;
 	friend std::ostream& operator<< (std::ostream &os, AssignedStack &I);
+	friend std::ostream& operator<< (std::ostream &os, AssignedStack* I);
 private:
 	Network *nt_;
 	IntVar** vars_;

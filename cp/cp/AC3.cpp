@@ -59,7 +59,7 @@ bool AC3::revise(arc & c_x)
 		if (!seek_support(c_value_int(c_x, a)))
 		{
 			c_x.v()->RemoveValue(a, lvl_);
-			std::cout << "(" << c_x.v_id() << ", " << a << ")" << std::endl;
+			//std::cout << "(" << c_x.v_id() << ", " << a << ")" << std::endl;
 			++delete_count;
 		}
 		a = c_x.v()->next(a);

@@ -59,7 +59,6 @@ void IntVar::RemoveValue(const int a, const int p)
 void IntVar::ReduceTo(const int a, const int p)
 {
 	int b = head_;
-	assigned_ = true;
 
 	while (b != -1)
 	{
@@ -71,6 +70,7 @@ void IntVar::ReduceTo(const int a, const int p)
 
 void IntVar::AddValue(const int a)
 {
+	++cur_size_;
 	absent_[a] = -1;
 	tail_absent_ = prev_absent_[a];
 
@@ -81,8 +81,6 @@ void IntVar::AddValue(const int a)
 void IntVar::RestoreUpTo(const int p)
 {
 	int b = tail_absent_;
-	assigned_ = false;
-	propagated_ = p - 1;
 
 	while (b != -1 && absent_[b] >= p)
 	{
@@ -108,7 +106,7 @@ int* IntVar::end()
 	return &tail_;
 }
 
-int IntVar::GetValueByIndex(const int idx) const
+int IntVar::value(const int idx) const
 {
 	return vals_[idx];
 }
@@ -128,17 +126,22 @@ int IntVar::assigned() const
 	return assigned_;
 }
 
-int IntVar::next(int a) const
+void IntVar::assigned(const bool a)
+{
+	assigned_ = a;
+}
+
+int IntVar::next(const int a) const
 {
 	return next_[a];
 }
 
-int IntVar::prev(int a) const
+int IntVar::prev(const int a) const
 {
 	return prev_[a];
 }
 
-bool IntVar::have(int a) const
+bool IntVar::have(const int a) const
 {
 	return absent_[a] == -1;
 }
@@ -155,7 +158,7 @@ int IntVar::tail()const
 
 bool IntVar::faild() const
 {
-	return cur_size_ == 1;
+	return cur_size_ == 0;
 }
 
 void Constraint::GetFirstValidTuple(v_value_int & v_a, IntTuple & t)
@@ -191,6 +194,10 @@ Tabular::Tabular(const int id, const std::vector<IntVar*>& scope, int **  ts, co
 
 bool Tabular::sat(IntTuple &t)
 {
+	//for (int j = 0; j < ts_.size(); ++j)
+	//	for (int i = 0; i < arity_; ++i)
+	//		if (ts_[j][i] != scope_[i]->value[t[i]])
+	//			break;
 	return ts_.have(t);
 }
 

@@ -24,7 +24,7 @@ void MAC::enforce()
 	consistent_ = ac_->EnforceGAC_arc(x_evt_);
 	x_evt_->clear();
 	v_value_int v_a;
-	if (consistent_)
+	if (!consistent_)
 		return;
 
 	while (!finished_)
@@ -34,14 +34,15 @@ void MAC::enforce()
 		v_a.v()->ReduceTo(v_a.a(), I->size());
 		x_evt_->push_back(v_a.v());
 		consistent_ = ac_->EnforceGAC_arc(x_evt_, I->size());
+		x_evt_->clear();
 
 		if (consistent_&&I->full())
 		{
-			std::cout << I;
+			std::cout << I << std::endl;
 			consistent_ = false;
 		}
 
-		while (!consistent_ && !I->full())
+		while (!consistent_ && !I->empty())
 		{
 			v_a = I->pop();
 
@@ -50,8 +51,9 @@ void MAC::enforce()
 					v->RestoreUpTo(I->size() + 1);
 
 			v_a.v()->RemoveValue(v_a.a(), I->size());
-
-			consistent_ = !v_a.v()->size() && ac_->EnforceGAC_arc(x_evt_, I->size());
+			x_evt_->push_back(v_a.v());
+			consistent_ = v_a.v()->size() && ac_->EnforceGAC_arc(x_evt_, I->size());
+			x_evt_->clear();
 		}
 
 		if (!consistent_)

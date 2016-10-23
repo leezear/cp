@@ -54,13 +54,14 @@ public:
 	int* begin();
 	int* next();
 	int* end();
-	int GetValueByIndex(const int idx) const;
+	int value(const int idx) const;
 	int size() const;
 	int capacity() const;
 	int assigned() const;
-	int next(int a) const;
-	int prev(int a) const;
-	bool have(int a) const;
+	void assigned(const bool a);
+	int next(const int a) const;
+	int prev(const int a) const;
+	bool have(const int a) const;
 	int head() const;
 	int tail() const;
 	bool faild() const;
@@ -68,7 +69,7 @@ public:
 	std::vector<Constraint *>& subscribe() { return cs_; }
 	void subscribe(Constraint* c) { cs_.push_back(c); }
 
-	bool propagated(const int level) const { return (level == propagated_); }
+	//bool propagated(const int level) const { return (level == propagated_); }
 	int stamp() const { return stamp_; }
 	void stamp(int val) { stamp_ = val; }
 	//int propagated() const { return propagated_; }
@@ -91,7 +92,7 @@ private:
 	bool assigned_ = false;
 	int* ptr_;
 	int lmt_;
-	int propagated_ = 0;
+	//int propagated_ = 0;
 	int stamp_;
 	std::vector<Constraint* > cs_;
 

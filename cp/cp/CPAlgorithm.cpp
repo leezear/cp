@@ -162,6 +162,7 @@ void AssignedStack::push(v_value_int & v_a)
 {
 	vars_[lvl_] = v_a.v();
 	a_[lvl_] = v_a.a();
+	vars_[lvl_]->assigned(true);
 	++lvl_;
 }
 
@@ -169,6 +170,7 @@ v_value_int AssignedStack::pop()
 {
 	--lvl_;
 	v_value_int v_a(vars_[lvl_], a_[lvl_]);
+	vars_[lvl_]->assigned(false);
 	return v_a;
 }
 
@@ -190,8 +192,15 @@ v_value_int AssignedStack::at(const int i) const
 std::ostream & operator<<(std::ostream & os, AssignedStack & I)
 {
 	for (int i = 0; i < I.size(); ++i)
-		os << I[i] << "\t";
-	os << std::endl;
+		os << "(" << I[i].v()->id() << ", " << I[i].a() << ")\t";
+
+	return os;
+}
+
+std::ostream & operator<<(std::ostream & os, AssignedStack * I)
+{
+	for (int i = 0; i < I->size(); ++i)
+		os << "(" << I->at(i).v()->id() << ", " << I->at(i).a() << ")\t";
 
 	return os;
 }

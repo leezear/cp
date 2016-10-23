@@ -2,7 +2,7 @@
 
 using namespace std;
 #include "Model.h"
-#include "AC3.h"
+#include "MAC.h"
 using namespace cp;
 
 int main()
@@ -43,10 +43,8 @@ int main()
 	vector<IntVar*> scp1 = { nt->vars_[1],nt->vars_[2] };
 	nt->MakeTab(0, scp0, tuple0, 3);
 	nt->MakeTab(1, scp1, tuple1, 3);
-	VarEvt* x_evt;
-	x_evt = new VarEvt(nt);
-	AC3* ac3 = new AC3(nt);
-	ac3->EnforceGAC_arc(x_evt);
+	MAC* mac = new MAC(nt, AC_3);
+	mac->enforce();
 
 	for (int i = 0; i < 3; ++i)
 	{
@@ -60,8 +58,7 @@ int main()
 		tuple1[i] = NULL;
 	}
 
-	delete x_evt;
-	delete ac3;
+	delete mac;
 	delete nt;
 
 	return 0;
