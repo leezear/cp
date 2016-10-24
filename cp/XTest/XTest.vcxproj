@@ -25,6 +25,7 @@
     <Xml Include="BMPath.xml" />
     <Xml Include="queens-12_ext.xml" />
     <Xml Include="XMLFile.xml" />
+    <Xml Include="XMLFileNeg.xml" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{54F5629C-845F-4FC4-82F3-6F2D3087A640}</ProjectGuid>

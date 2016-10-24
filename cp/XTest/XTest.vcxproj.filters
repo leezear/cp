@@ -23,5 +23,6 @@
     <Xml Include="BMPath.xml" />
     <Xml Include="queens-12_ext.xml" />
     <Xml Include="XMLFile.xml" />
+    <Xml Include="XMLFileNeg.xml" />
   </ItemGroup>
 </Project>

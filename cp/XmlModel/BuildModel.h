@@ -10,6 +10,12 @@ namespace cp
 namespace parse
 {
 
+inline void Equal(int* lh, const int* rh, const int& len)
+{
+	for (int i = 0; i < len; ++i)
+		lh[i] = rh[i];
+}
+
 //************************************
 // Method:    IsEqual
 // FullName:  IsEqual
@@ -65,7 +71,7 @@ void BuildModel(const XMLModel *xmodel, Network* nt_)
 	{
 		int* tpl = new int[xmodel->features.arity];
 		XMLDomain** ds = new XMLDomain*[xmodel->features.arity];
-		int num_tuples;
+		int num_tuples, sup_size_;
 
 		for (int i = 0; i < xmodel->cs_size; ++i)
 		{
@@ -77,6 +83,7 @@ void BuildModel(const XMLModel *xmodel, Network* nt_)
 			{
 				scope.push_back(nt_->vars_[c->scope[j]]);
 			}
+
 			if (r->semantices == SEM_SUPPORT)
 			{
 				nt_->MakeTab(i, scope, r->tuples, r->size);
@@ -85,47 +92,53 @@ void BuildModel(const XMLModel *xmodel, Network* nt_)
 
 				//ts.finalize();
 			}
-			//else
-			//{
-			//	num_tuples = 1;
+			else
+			{
+				int** ts;
+				num_tuples = 1;
 
-			//	for (int j = 0; j < r->arity; ++j)
-			//	{
-			//		v = &xmodel->variables[j];
-			//		d = &xmodel->domains[v->dm_id];
-			//		ds[j] = d;
-			//		num_tuples *= d->size;
-			//	}
+				for (int j = 0; j < r->arity; ++j)
+				{
+					v = &xmodel->variables[j];
+					d = &xmodel->domains[v->dm_id];
+					ds[j] = d;
+					num_tuples *= d->size;
+				}
 
-			//	for (int j = 0; j < num_tuples; ++j)
-			//	{
-			//		GetIntTuple(j, tpl, r->arity, ds);
+				sup_size_ = num_tuples - r->size;
+				ts = new int*[sup_size_];
 
-			//		//支持
-			//		if (k < r->size)
-			//		{
-			//			if (!IsEqual(r->tuples[k], tpl, r->arity))
-			//			{
-			//				ts.add(IntArgs(c->arity, tpl));
-			//			}
-			//			else
-			//				++k;
-			//		}
-			//		else
-			//			ts.add(IntArgs(c->arity, tpl));
-			//	}
+				for (int j = 0; j < num_tuples; ++j)
+				{
+					ts[k] = new int[r->arity];
+					GetIntTuple(j, tpl, r->arity, ds);
+					//支持
+					if (k < r->size)
+					{
+						std::cout << r->tuples[k][0] << ", " << r->tuples[k][1] << "_" << tpl[0] << ", " << tpl[1] << std::endl;
+						if (!IsEqual(r->tuples[k], tpl, r->arity))
+						{
+							Equal(ts[k], tpl, r->arity);
+						}
+						else
+							++k;
+					}
+					else
+						Equal(ts[k], tpl, r->arity);
+				}
 
-			//	ts.finalize();
-			//}
+				nt_->MakeTab(i, scope, ts, sup_size_);
 
-			//IntVarArgs scope;
+				for (int k = 0; k < sup_size_; ++k)
+				{
+					delete[] ts[k];
+					ts[k] = NULL;
+				}
 
-			//for (int j = 0; j < c->arity; ++j)
-			//{
-			//	scope << nt_->vars_[c->scope[j]];
-			//}
-			////IntVarArray s;
-			//extensional(*g_model, scope, ts);
+				delete[] ts;
+				ts = NULL;
+
+			}
 		}
 
 		delete[] tpl;
