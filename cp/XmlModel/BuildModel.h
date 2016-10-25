@@ -75,7 +75,7 @@ void BuildModel(const XMLModel *xmodel, Network* nt_)
 
 		for (int i = 0; i < xmodel->cs_size; ++i)
 		{
-			int k = 0;
+
 			c = &xmodel->constraints[i];
 			r = &xmodel->relations[c->re_id];
 			std::vector<IntVar *> scope;
@@ -108,20 +108,23 @@ void BuildModel(const XMLModel *xmodel, Network* nt_)
 				sup_size_ = num_tuples - r->size;
 				ts = new int*[sup_size_];
 
+				for (int j = 0; j < sup_size_; ++j)
+					ts[j] = new int[r->arity];
+
+				int k = 0;
 				for (int j = 0; j < num_tuples; ++j)
 				{
-					ts[k] = new int[r->arity];
 					GetIntTuple(j, tpl, r->arity, ds);
 					//Ö§³Ö
 					if (k < r->size)
 					{
-						std::cout << r->tuples[k][0] << ", " << r->tuples[k][1] << "_" << tpl[0] << ", " << tpl[1] << std::endl;
+						//std::cout << r->tuples[k][0] << ", " << r->tuples[k][1] << "_" << tpl[0] << ", " << tpl[1] << std::endl;
 						if (!IsEqual(r->tuples[k], tpl, r->arity))
 						{
 							Equal(ts[k], tpl, r->arity);
-						}
-						else
 							++k;
+							std::cout << k << "--" << ts[k][0] << ", " << ts[k][1] << std::endl;
+						}
 					}
 					else
 						Equal(ts[k], tpl, r->arity);
