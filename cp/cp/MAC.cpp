@@ -39,6 +39,7 @@ void MAC::enforce()
 		if (consistent_&&I->full())
 		{
 			std::cout << I << std::endl;
+			++sol_count_;
 			consistent_ = false;
 		}
 

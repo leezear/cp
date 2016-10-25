@@ -1,19 +1,37 @@
 #pragma once
 #include "Model.h"
 #include "XMLModel.h"
+#include <map>
 
 using namespace cp;
 using namespace cp::model;
+
+class XDom
+{
+public:
+	XDom() {}
+	virtual ~XDom() {}
+
+	void MakeMap(XMLDomain* d)
+	{
+		id = d->id;
+		for (int i = 0; i < d->size; i++)
+			m[d->values[i]] = i;
+	}
+
+	int id;
+	std::map<int, int> m;
+};
 
 namespace cp
 {
 namespace parse
 {
 
-void Equal(int* lh, const int* rh, const int& len)
+inline void Equal(int* lh, const int* rh, const int& len, XMLDomain **ds, std::vector<XDom>& xds)
 {
 	for (int i = 0; i < len; ++i)
-		lh[i] = rh[i];
+		lh[i] = xds[ds[i]->id].m[rh[i]];
 }
 
 //************************************
@@ -26,7 +44,7 @@ void Equal(int* lh, const int* rh, const int& len)
 // Parameter: const int * rh
 // Parameter: const int & len	元组长度
 //************************************
-bool IsEqual(const int* lh, const int* rh, const int& len)
+inline bool IsEqual(const int* lh, const int* rh, const int& len)
 {
 	for (int i = 0; i < len; ++i)
 		if (lh[i] != rh[i])
@@ -61,6 +79,13 @@ void BuildModel(const XMLModel *xmodel, Network* nt_)
 	XMLVariable* v;
 	XMLDomain* d;
 	nt_->max_arity(xmodel->features.arity);
+	std::vector<XDom> xds(xmodel->ds_size);
+
+	for (int i = 0; i < xmodel->ds_size; ++i)
+	{
+		xds[i].MakeMap(&xmodel->domains[i]);
+	}
+
 	for (int i = 0; i < xmodel->vs_size; ++i)
 	{
 		d = &(xmodel->domains[xmodel->variables[i].dm_id]);
@@ -79,19 +104,13 @@ void BuildModel(const XMLModel *xmodel, Network* nt_)
 			c = &xmodel->constraints[i];
 			r = &xmodel->relations[c->re_id];
 			std::vector<IntVar *> scope;
+
 			for (int j = 0; j < c->arity; ++j)
-			{
 				scope.push_back(nt_->vars_[c->scope[j]]);
-			}
+
 
 			if (r->semantices == SEM_SUPPORT)
-			{
 				nt_->MakeTab(i, scope, r->tuples, r->size);
-				//for (int j = 0; j < r->size; ++j)
-				//	ts.add(IntArgs(c->arity, r->tuples[j]));
-
-				//ts.finalize();
-			}
 			else
 			{
 				int** ts;
@@ -111,23 +130,27 @@ void BuildModel(const XMLModel *xmodel, Network* nt_)
 				for (int j = 0; j < sup_size_; ++j)
 					ts[j] = new int[r->arity];
 
-				int k = 0;
+				int k = 0, m = 0;
 				for (int j = 0; j < num_tuples; ++j)
 				{
 					GetIntTuple(j, tpl, r->arity, ds);
 					//支持
-					if (k < r->size)
+					if (m < r->size)
 					{
 						//std::cout << r->tuples[k][0] << ", " << r->tuples[k][1] << "_" << tpl[0] << ", " << tpl[1] << std::endl;
-						if (!IsEqual(r->tuples[k], tpl, r->arity))
+						if (!IsEqual(r->tuples[m], tpl, r->arity))
 						{
-							Equal(ts[k], tpl, r->arity);
-							std::cout << k << "--" << ts[k][0] << ", " << ts[k][1] << std::endl;
+							Equal(ts[k], tpl, r->arity, ds, xds);
 							++k;
 						}
+						else
+							++m;
 					}
 					else
-						Equal(ts[k], tpl, r->arity);
+					{
+						Equal(ts[k], tpl, r->arity, ds, xds);
+						++k;
+					}
 				}
 
 				nt_->MakeTab(i, scope, ts, sup_size_);
