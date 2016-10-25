@@ -10,7 +10,7 @@ namespace cp
 namespace parse
 {
 
-inline void Equal(int* lh, const int* rh, const int& len)
+void Equal(int* lh, const int* rh, const int& len)
 {
 	for (int i = 0; i < len; ++i)
 		lh[i] = rh[i];
@@ -26,7 +26,7 @@ inline void Equal(int* lh, const int* rh, const int& len)
 // Parameter: const int * rh
 // Parameter: const int & len	元组长度
 //************************************
-inline bool IsEqual(const int* lh, const int* rh, const int& len)
+bool IsEqual(const int* lh, const int* rh, const int& len)
 {
 	for (int i = 0; i < len; ++i)
 		if (lh[i] != rh[i])
@@ -122,8 +122,8 @@ void BuildModel(const XMLModel *xmodel, Network* nt_)
 						if (!IsEqual(r->tuples[k], tpl, r->arity))
 						{
 							Equal(ts[k], tpl, r->arity);
-							++k;
 							std::cout << k << "--" << ts[k][0] << ", " << ts[k][1] << std::endl;
+							++k;
 						}
 					}
 					else
