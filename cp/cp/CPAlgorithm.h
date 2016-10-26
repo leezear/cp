@@ -35,14 +35,6 @@ enum ACAlgorithm {
 	AC_1, AC_2, AC_3, AC_4, AC_6, AC_7, AC_2001, AC_3rm, STR_1, STR_2, STR_3
 };
 
-//struct VarNode
-//{
-//	int prev;
-//	IntVar* v;
-//	int absent;
-//	int next;
-//};
-
 class VarEvt
 {
 public:
@@ -64,8 +56,9 @@ private:
 template<class T>
 class LinkedNode
 {
+public:
 	int prev;
-	T v_a;
+	T data;
 	int absent;
 	int next;
 };
@@ -77,19 +70,22 @@ public:
 	VarList(Network* nt_);
 	virtual ~VarList();
 
-	IntVar* operator[](const int i);
-	void push_back(T& v);
+	const T operator[](const int i);
+	void VarList<IntVar*>::push_back(IntVar* v);
+	void VarList<IntVal>::push_back(IntVal *v_a);
+	const bool full();
+	const bool empty();
 	void clear();
-	int size() const;
-	IntVar* at(const int i);
+	T top() const;
+	//int size() const;
+	T at(const int i);
 
-private:
-	void generateNode(IntVar* const v);
-	LinkedNode<T>* node_;
+protected:
+	LinkedNode<T>* nodes_;
 	int size_;
 	int cur_size_;
-	int head_;
-	int tail_;
+	int head_ = 0;
+	int tail_ = 0;
 	int top_;
 };
 
@@ -171,6 +167,8 @@ protected:
 	int delete_count = 0;
 	int lvl_;
 };
+
+
 
 
 

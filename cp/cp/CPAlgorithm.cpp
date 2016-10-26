@@ -66,7 +66,7 @@ VarEvt::~VarEvt()
 	delete[] vars_;
 }
 
-void cp::VarEvt::push_back(IntVar* v)
+void VarEvt::push_back(IntVar* v)
 {
 	vars_[cur_size_] = v;
 	++cur_size_;
@@ -205,59 +205,149 @@ std::ostream & operator<<(std::ostream & os, AssignedStack * I)
 	return os;
 }
 
-template<typename T>
-inline VarList<T>::VarList(Network * nt_)
+inline VarList<IntVal>::VarList(Network * nt_)
 {
-	node_ = new VarNode[size_];
-	node_ = new VarNode[size_];
+	nodes_ = new LinkedNode<IntVal>[size_];
 
 	for (IntVar* v : nt_->vars_)
 	{
-		generateNode(v)
+		nodes_[v->id()].data = IntVal(v, Limits::UNSIGNED_VAL);
+		nodes_[v->id()].absent = Limits::ABSENT;
+	}
+
+	head_ = 0;
+	tail_ = 0;
+	nodes_[0].prev = Limits::INDEX_OVERFLOW;
+	nodes_[tail_].next = Limits::INDEX_OVERFLOW;
+	cur_size_ = 0;
+}
+
+inline VarList<IntVar*>::VarList(Network * nt_)
+{
+	nodes_ = new LinkedNode<IntVar*>[size_];
+
+	for (IntVar* v : nt_->vars_)
+	{
+		nodes_[v->id()].data = v;
+		nodes_[v->id()].absent = Limits::PRESENT;
+		nodes_[v->id()].next = v->id() + 1;
+		nodes_[v->id()].prev = v->id() - 1;
 	}
 
 	head_ = 0;
 	tail_ = size_ - 1;
-	node_[0].prev = Limits::INDEX_ABSENT;
-	node_[tail_].next = Limits::INDEX_ABSENT;
+	nodes_[0].prev = Limits::INDEX_OVERFLOW;
+	nodes_[tail_].next = Limits::INDEX_OVERFLOW;
+	cur_size_ = nt_->vars_size();
 }
 
 template<typename T>
 VarList<T>::~VarList()
 {
-	delete[] node_;
+	delete[] nodes_;
 }
 
-IntVar * VarList<VarNode>::operator[](const int i)
+template<class T>
+const T VarList<T>::operator[](const int i)
 {
-	return node_[i].v;
+	return nodes_[i].data;
 }
 
-template<typename T>
-void VarList<T>::push_back(T& v)
+//void VarList<IntVar*>::push_back(IntVar* v)
+//{
+//	const int vid = v->id();
+//
+//	if (full())
+//		++cur_size_;
+//	else if (empty())
+//		head_ = vid;
+//	else
+//		nodes_[tail_].next = vid;
+//
+//	nodes_[vid].prev = tail_;
+//	nodes_[vid].next = Limits::INDEX_OVERFLOW;
+//	tail_ = vid;
+//}
+template<class T>
+void VarList<T>::push_back(T t)
 {
+	const int vid = v->id();
+
+	if (full())
+		++cur_size_;
+	else if (empty())
+		head_ = vid;
+	else
+		nodes_[tail_].next = vid;
+
+	nodes_[vid].data = t;
+	nodes_[vid].prev = tail_;
+	nodes_[vid].next = Limits::INDEX_OVERFLOW;
+	tail_ = vid;
 }
 
-IntVar * VarList<IntValNode>::operator[](const int i)
+template<class T>
+const bool VarList<T>::full()
 {
-	return node_[i].v_a.v();
+	return cur_size_ == size_;
 }
 
-void VarList<VarNode>::generateNode(IntVar * const v)
+template<class T>
+const bool VarList<T>::empty()
 {
-	node_[v->id()].v = v;
-	node_[v->id()].absent = Limits::INDEX_ABSENT;
-	node_[v->id()].next = v->id() + 1;
-	node_[v->id()].prev = v->id() - 1;
+	return cur_size_ == 0;
 }
 
-
-void VarList<IntValNode>::generateNode(IntVar* const v)
+template<class T>
+void VarList<T>::clear()
 {
-	node_[v->id()].v_a = IntVal(v, Limits::UNSIGNED_VAL);
-	node_[v->id()].absent = Limits::INDEX_ABSENT;
-	node_[v->id()].next = v->id() + 1;
-	node_[v->id()].prev = v->id() - 1;
+	head_ = Limits::INDEX_OVERFLOW;
+	tail_ = head_;
 }
+
+template<class T>
+T VarList<T>::top() const
+{
+	return nodes_[tail_].data;
+}
+
+template<class T>
+T VarList<T>::at(const int i)
+{
+	return nodes_[i].data;
+}
+
+
+
+
+
+
+
+
+//void VarList<IntVal>::generateNode()
+
+//IntVar * VarList<IntVar>::operator[](const int i)
+//{
+//	//return nodes_[i].data.v();
+//}
+
+//template<typename T>
+//void VarList<T>::push_back(T& v)
+//{
+//}
+//
+//template<class T>
+//void VarList<T>::clear()
+//{
+//	cur_size_ = 0;
+//}
+
+//void VarList<IntVar>::generateNode(IntVar* const v)
+//{
+//	nodes_[v->id()].data = v;
+//	nodes_[v->id()].absent = Limits::INDEX_ABSENT;
+//	nodes_[v->id()].next = v->id() + 1;
+//	nodes_[v->id()].prev = v->id() - 1;
+//}
 
 }

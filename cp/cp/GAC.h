@@ -19,7 +19,7 @@ protected:
 	pro_que<T> Q;
 
 	virtual bool revise(arc &c_x) {}
-	virtual bool seek_support(c_value_int& c_val) {}
+	virtual bool seek_support(IntConVar& c_val) {}
 	virtual void inital_queue() {}
 	int lvl_;
 };

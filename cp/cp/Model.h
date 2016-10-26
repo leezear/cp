@@ -22,7 +22,9 @@ const int MIN_OPT = INT_MIN + 1;
 const int UNSIGNED_VAL = INT_MIN & 0xffff7000;
 const int MIN_VAL = UNSIGNED_VAL + 1;
 const int MAX_VAL = MIN_INTVAR_ID - 1;
-const int INDEX_ABSENT = -1;
+const int INDEX_OVERFLOW = -1;
+const int PRESENT = -1;
+const int ABSENT = 0;
 }
 
 enum IntVariableType
@@ -451,7 +453,8 @@ public:
 
 	IntVar* v() const { return v_; }
 	void v(IntVar* val) { v_ = val; }
-
+	const IntVal& operator=(const IntVal& rhs);
+	//const int id() { return v_->id(); }
 	int a() const { return a_; }
 	void a(int val) { a_ = val; }
 	friend std::ostream& operator<< (std::ostream &os, IntVal &v_val);
@@ -460,15 +463,15 @@ private:
 	int a_;
 };
 
-class c_value_int
+class IntConVar
 {
 public:
-	c_value_int() {}
-	c_value_int(Constraint* c, IntVar *v, const  int a) : c_(c), v_(v), a_(a) {}
-	c_value_int(Constraint* c, IntVal& va) :c_(c), v_(va.v()), a_(va.a()) {}
-	c_value_int(arc& rc, const int a) :c_(rc.c()), v_(rc.v()), a_(a) {}
+	IntConVar() {}
+	IntConVar(Constraint* c, IntVar *v, const  int a) : c_(c), v_(v), a_(a) {}
+	IntConVar(Constraint* c, IntVal& va) :c_(c), v_(va.v()), a_(va.a()) {}
+	IntConVar(arc& rc, const int a) :c_(rc.c()), v_(rc.v()), a_(a) {}
 
-	virtual ~c_value_int() {}
+	virtual ~IntConVar() {}
 
 	Constraint* c() const { return c_; }
 	void c(Constraint* c) { c_ = c; }
@@ -483,9 +486,9 @@ public:
 	arc get_arc() const { return arc(c_, v_); }
 	IntVal get_v_value() const { return IntVal(v_, a_); }
 
-	const c_value_int& operator=(const c_value_int& rhs);
+	const IntConVar& operator=(const IntConVar& rhs);
 
-	friend std::ostream& operator<< (std::ostream &os, c_value_int &c_val)
+	friend std::ostream& operator<< (std::ostream &os, IntConVar &c_val)
 	{
 		os << "(" << c_val.c_->id() << ", " << c_val.v_->id() << ", " << c_val.a_ << ")";
 		return os;
@@ -511,8 +514,8 @@ public:
 	size_t vars_size() { return vars_.size(); }
 	size_t cons_size() { return cons_.size(); }
 
-	void GetFirstValidTuple(c_value_int & c_val, IntTuple& t);
-	void GetNextValidTuple(c_value_int & c_val, IntTuple& t);
+	void GetFirstValidTuple(IntConVar & c_val, IntTuple& t);
+	void GetNextValidTuple(IntConVar & c_val, IntTuple& t);
 
 	std::vector<IntVar*> vars_;
 	std::vector<Constraint*> cons_;
