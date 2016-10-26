@@ -30,7 +30,8 @@ int main()
 	mac->enforce();
 	end = clock_t();
 	cout << "solutions = " << mac->sol_count() << endl;
-	cout << "execute time = " << end - begin << endl;
+	int time = end - begin;
+	cout << "execute time = " << time << endl;
 	delete mac;
 	delete nt;
 

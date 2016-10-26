@@ -20,7 +20,7 @@ private:
 	VarEvt* x_evt_;
 	ACAlgorithm ac_algzm_;
 	AssignedStack* I;
-	v_value_int select_v_value();
+	IntVal select_v_value();
 	bool consistent_;
 	bool finished_ = false;
 };

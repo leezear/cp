@@ -54,7 +54,7 @@ bool AC3::revise(arc & c_x)
 	int num_elements = c_x.v()->size();
 	int a = c_x.v()->head();
 
-	while (a != -1)
+	while (a != Limits::INDEX_ABSENT)
 	{
 		if (!seek_support(c_value_int(c_x, a)))
 		{

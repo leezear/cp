@@ -35,6 +35,14 @@ enum ACAlgorithm {
 	AC_1, AC_2, AC_3, AC_4, AC_6, AC_7, AC_2001, AC_3rm, STR_1, STR_2, STR_3
 };
 
+//struct VarNode
+//{
+//	int prev;
+//	IntVar* v;
+//	int absent;
+//	int next;
+//};
+
 class VarEvt
 {
 public:
@@ -51,6 +59,38 @@ private:
 	IntVar** vars_;
 	int size_;
 	int cur_size_;
+};
+
+template<class T>
+class LinkedNode
+{
+	int prev;
+	T v_a;
+	int absent;
+	int next;
+};
+
+template<class T>
+class VarList
+{
+public:
+	VarList(Network* nt_);
+	virtual ~VarList();
+
+	IntVar* operator[](const int i);
+	void push_back(T& v);
+	void clear();
+	int size() const;
+	IntVar* at(const int i);
+
+private:
+	void generateNode(IntVar* const v);
+	LinkedNode<T>* node_;
+	int size_;
+	int cur_size_;
+	int head_;
+	int tail_;
+	int top_;
 };
 
 
@@ -83,15 +123,15 @@ public:
 	AssignedStack(Network *nt);
 	virtual ~AssignedStack();
 
-	void push(v_value_int& v_a);
-	v_value_int pop();
-	v_value_int top() const;
+	void push(IntVal& v_a);
+	IntVal pop();
+	IntVal top() const;
 	int size() const { return lvl_; }
 	int capacity() const { return size_; }
 	bool full() const { return lvl_ == size_; }
 	bool empty() const { return lvl_ == 0; }
-	v_value_int operator[](const int i) const;
-	v_value_int at(const int i) const;
+	IntVal operator[](const int i) const;
+	IntVal at(const int i) const;
 	friend std::ostream& operator<< (std::ostream &os, AssignedStack &I);
 	friend std::ostream& operator<< (std::ostream &os, AssignedStack* I);
 private:
@@ -131,6 +171,8 @@ protected:
 	int delete_count = 0;
 	int lvl_;
 };
+
+
 
 
 }

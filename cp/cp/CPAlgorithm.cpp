@@ -158,7 +158,7 @@ AssignedStack::~AssignedStack()
 	delete[] a_;
 }
 
-void AssignedStack::push(v_value_int & v_a)
+void AssignedStack::push(IntVal & v_a)
 {
 	vars_[lvl_] = v_a.v();
 	a_[lvl_] = v_a.a();
@@ -166,27 +166,27 @@ void AssignedStack::push(v_value_int & v_a)
 	++lvl_;
 }
 
-v_value_int AssignedStack::pop()
+IntVal AssignedStack::pop()
 {
 	--lvl_;
-	v_value_int v_a(vars_[lvl_], a_[lvl_]);
+	IntVal v_a(vars_[lvl_], a_[lvl_]);
 	vars_[lvl_]->assigned(false);
 	return v_a;
 }
 
-v_value_int AssignedStack::top() const
+IntVal AssignedStack::top() const
 {
-	return v_value_int(vars_[lvl_], a_[lvl_]);
+	return IntVal(vars_[lvl_], a_[lvl_]);
 }
 
-v_value_int AssignedStack::operator[](const int i) const
+IntVal AssignedStack::operator[](const int i) const
 {
-	return v_value_int(vars_[i], a_[i]);
+	return IntVal(vars_[i], a_[i]);
 }
 
-v_value_int AssignedStack::at(const int i) const
+IntVal AssignedStack::at(const int i) const
 {
-	return v_value_int(vars_[i], a_[i]);
+	return IntVal(vars_[i], a_[i]);
 }
 
 std::ostream & operator<<(std::ostream & os, AssignedStack & I)
@@ -203,6 +203,61 @@ std::ostream & operator<<(std::ostream & os, AssignedStack * I)
 		os << "(" << I->at(i).v()->id() << ", " << I->at(i).a() << ")\t";
 
 	return os;
+}
+
+template<typename T>
+inline VarList<T>::VarList(Network * nt_)
+{
+	node_ = new VarNode[size_];
+	node_ = new VarNode[size_];
+
+	for (IntVar* v : nt_->vars_)
+	{
+		generateNode(v)
+	}
+
+	head_ = 0;
+	tail_ = size_ - 1;
+	node_[0].prev = Limits::INDEX_ABSENT;
+	node_[tail_].next = Limits::INDEX_ABSENT;
+}
+
+template<typename T>
+VarList<T>::~VarList()
+{
+	delete[] node_;
+}
+
+IntVar * VarList<VarNode>::operator[](const int i)
+{
+	return node_[i].v;
+}
+
+template<typename T>
+void VarList<T>::push_back(T& v)
+{
+}
+
+IntVar * VarList<IntValNode>::operator[](const int i)
+{
+	return node_[i].v_a.v();
+}
+
+void VarList<VarNode>::generateNode(IntVar * const v)
+{
+	node_[v->id()].v = v;
+	node_[v->id()].absent = Limits::INDEX_ABSENT;
+	node_[v->id()].next = v->id() + 1;
+	node_[v->id()].prev = v->id() - 1;
+}
+
+
+void VarList<IntValNode>::generateNode(IntVar* const v)
+{
+	node_[v->id()].v_a = IntVal(v, Limits::UNSIGNED_VAL);
+	node_[v->id()].absent = Limits::INDEX_ABSENT;
+	node_[v->id()].next = v->id() + 1;
+	node_[v->id()].prev = v->id() - 1;
 }
 
 }

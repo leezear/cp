@@ -17,14 +17,14 @@ IntVar::IntVar(const int id, const int * values, const int size) :
 	for (int i = 0; i < size_; ++i)
 	{
 		vals_[i] = values[i];
-		absent_[i] = -1;
+		absent_[i] = Limits::INDEX_ABSENT;
 		next_[i] = i + 1;
 		prev_[i] = i - 1;
-		prev_absent_[i] = -1;
+		prev_absent_[i] = Limits::INDEX_ABSENT;
 	}
 
-	next_[size_ - 1] = -1;
-	prev_[0] = -1;
+	next_[size_ - 1] = Limits::INDEX_ABSENT;
+	prev_[0] = Limits::INDEX_ABSENT;
 	tail_ = size_ - 1;
 	lmt_ = vals_[size_ - 1];
 }
@@ -52,15 +52,15 @@ void IntVar::RemoveValue(const int a, const int p)
 	prev_absent_[a] = tail_absent_;
 	tail_absent_ = a;
 
-	(prev_[a] == -1) ? head_ = next_[a] : next_[prev_[a]] = next_[a];
-	(next_[a] == -1) ? tail_ = prev_[a] : prev_[next_[a]] = prev_[a];
+	(prev_[a] == Limits::INDEX_ABSENT) ? head_ = next_[a] : next_[prev_[a]] = next_[a];
+	(next_[a] == Limits::INDEX_ABSENT) ? tail_ = prev_[a] : prev_[next_[a]] = prev_[a];
 }
 
 void IntVar::ReduceTo(const int a, const int p)
 {
 	int b = head_;
 
-	while (b != -1)
+	while (b != Limits::INDEX_ABSENT)
 	{
 		if (b != a)
 			RemoveValue(b, p);
@@ -71,18 +71,18 @@ void IntVar::ReduceTo(const int a, const int p)
 void IntVar::AddValue(const int a)
 {
 	++cur_size_;
-	absent_[a] = -1;
+	absent_[a] = Limits::INDEX_ABSENT;
 	tail_absent_ = prev_absent_[a];
 
-	(prev_[a] == -1) ? head_ = a : next_[prev_[a]] = a;
-	(next_[a] == -1) ? tail_ = a : prev_[next_[a]] = a;
+	(prev_[a] == Limits::INDEX_ABSENT) ? head_ = a : next_[prev_[a]] = a;
+	(next_[a] == Limits::INDEX_ABSENT) ? tail_ = a : prev_[next_[a]] = a;
 }
 
 void IntVar::RestoreUpTo(const int p)
 {
 	int b = tail_absent_;
 
-	while (b != -1 && absent_[b] >= p)
+	while (b != Limits::INDEX_ABSENT && absent_[b] >= p)
 	{
 		AddValue(b);
 		b = prev_absent_[b];
@@ -143,7 +143,7 @@ int IntVar::prev(const int a) const
 
 bool IntVar::have(const int a) const
 {
-	return absent_[a] == -1;
+	return absent_[a] == Limits::INDEX_ABSENT;
 }
 
 int IntVar::head() const
@@ -161,7 +161,7 @@ bool IntVar::faild() const
 	return cur_size_ == 0;
 }
 
-void Constraint::GetFirstValidTuple(v_value_int & v_a, IntTuple & t)
+void Constraint::GetFirstValidTuple(IntVal & v_a, IntTuple & t)
 {
 	for (size_t i = 0; i < arity_; ++i)
 		if (scope_[i] != v_a.v())
@@ -170,11 +170,11 @@ void Constraint::GetFirstValidTuple(v_value_int & v_a, IntTuple & t)
 			t[i] = v_a.a();
 }
 
-void Constraint::GetNextValidTuple(v_value_int& v_a, IntTuple&t)
+void Constraint::GetNextValidTuple(IntVal& v_a, IntTuple&t)
 {
 	for (int i = arity_ - 1; i >= 0; --i)
 		if (scope_[i] != v_a.v())
-			if (scope_[i]->next(t[i]) == -1)
+			if (scope_[i]->next(t[i]) == Limits::INDEX_ABSENT)
 				t[i] = scope_[i]->head();
 			else
 			{
@@ -218,13 +218,13 @@ void Network::MakeTab(const int id, const std::vector<IntVar *>& scope, int** ts
 
 void Network::GetFirstValidTuple(c_value_int & c_val, IntTuple& t)
 {
-	v_value_int v_a(c_val.v(), c_val.a());
+	IntVal v_a(c_val.v(), c_val.a());
 	c_val.c()->GetFirstValidTuple(v_a, t);
 }
 
 void Network::GetNextValidTuple(c_value_int & c_val, IntTuple& t)
 {
-	v_value_int v_a(c_val.v(), c_val.a());
+	IntVal v_a(c_val.v(), c_val.a());
 	c_val.c()->GetNextValidTuple(v_a, t);
 }
 
@@ -237,7 +237,7 @@ const cp::c_value_int& c_value_int::operator=(const c_value_int& rhs)
 	return *this;
 }
 
-std::ostream & operator<<(std::ostream & os, v_value_int & v_val)
+std::ostream & operator<<(std::ostream & os, IntVal & v_val)
 {
 	os << "(" << v_val.v_->id() << ", " << v_val.a_ << ")";
 	return os;

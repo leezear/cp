@@ -23,7 +23,7 @@ void MAC::enforce()
 {
 	consistent_ = ac_->EnforceGAC_arc(x_evt_);
 	x_evt_->clear();
-	v_value_int v_a;
+	IntVal v_a;
 	if (!consistent_)
 		return;
 
@@ -70,10 +70,10 @@ MAC::~MAC()
 	delete I;
 }
 
-cp::v_value_int MAC::select_v_value()
+cp::IntVal MAC::select_v_value()
 {
 	IntVar* v = nt_->vars_[I->size()];
-	return v_value_int(v, v->head());
+	return IntVal(v, v->head());
 }
 
 }

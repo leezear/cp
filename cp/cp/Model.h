@@ -9,6 +9,22 @@
 
 namespace cp
 {
+
+namespace Limits
+{
+/**
+* \brief È¡Öµ·¶Î§
+*/
+const int MIN_INTVAR_ID = 0x7fff7000;
+const int MAX_INTVAR_ID = INT_MAX - 1;
+const int MAX_OPT = INT_MIN & 0xffff7000 - 1;
+const int MIN_OPT = INT_MIN + 1;
+const int UNSIGNED_VAL = INT_MIN & 0xffff7000;
+const int MIN_VAL = UNSIGNED_VAL + 1;
+const int MAX_VAL = MIN_INTVAR_ID - 1;
+const int INDEX_ABSENT = -1;
+}
+
 enum IntVariableType
 {
 	CONTI_ZERO,
@@ -37,7 +53,7 @@ private:
 };
 
 class Constraint;
-class v_value_int;
+class IntVal;
 
 class IntVar :public Base
 {
@@ -370,8 +386,8 @@ public:
 		return -1;
 	}
 
-	virtual void GetFirstValidTuple(v_value_int& v_a, IntTuple&t);
-	virtual void GetNextValidTuple(v_value_int& v_a, IntTuple&t);
+	virtual void GetFirstValidTuple(IntVal& v_a, IntTuple&t);
+	virtual void GetNextValidTuple(IntVal& v_a, IntTuple&t);
 
 	virtual ~Constraint() {}
 protected:
@@ -426,19 +442,19 @@ private:
 	IntVar* v_;
 };
 
-class v_value_int
+class IntVal
 {
 public:
-	v_value_int() {}
-	v_value_int(IntVar *v, const int a) :v_(v), a_(a) {}
-	~v_value_int() {}
+	IntVal() {}
+	IntVal(IntVar *v, const int a) :v_(v), a_(a) {}
+	~IntVal() {}
 
 	IntVar* v() const { return v_; }
 	void v(IntVar* val) { v_ = val; }
 
 	int a() const { return a_; }
 	void a(int val) { a_ = val; }
-	friend std::ostream& operator<< (std::ostream &os, v_value_int &v_val);
+	friend std::ostream& operator<< (std::ostream &os, IntVal &v_val);
 private:
 	IntVar* v_;
 	int a_;
@@ -449,7 +465,7 @@ class c_value_int
 public:
 	c_value_int() {}
 	c_value_int(Constraint* c, IntVar *v, const  int a) : c_(c), v_(v), a_(a) {}
-	c_value_int(Constraint* c, v_value_int& va) :c_(c), v_(va.v()), a_(va.a()) {}
+	c_value_int(Constraint* c, IntVal& va) :c_(c), v_(va.v()), a_(va.a()) {}
 	c_value_int(arc& rc, const int a) :c_(rc.c()), v_(rc.v()), a_(a) {}
 
 	virtual ~c_value_int() {}
@@ -465,7 +481,7 @@ public:
 	void a(int val) { a_ = val; }
 
 	arc get_arc() const { return arc(c_, v_); }
-	v_value_int get_v_value() const { return v_value_int(v_, a_); }
+	IntVal get_v_value() const { return IntVal(v_, a_); }
 
 	const c_value_int& operator=(const c_value_int& rhs);
 
