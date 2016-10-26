@@ -32,7 +32,7 @@ namespace cp
 //};
 
 enum ACAlgorithm {
-	AC_1, AC_2, AC_3, AC_4, AC_6, AC_7, AC_2001, AC_3rm, STR_1, STR_2, STR_3
+	AC_1, AC_2, AC_3, AC_4, AC_6, AC_7, AC_2001, AC3_bit, AC_3rm, STR_1, STR_2, STR_3
 };
 
 class VarEvt
@@ -71,12 +71,14 @@ public:
 	virtual ~VarList();
 
 	const T operator[](const int i);
-	void VarList<IntVar*>::push_back(IntVar* v);
-	void VarList<IntVal>::push_back(IntVal *v_a);
+	void push_back(T t);
+	T pop_back();
+	T pop_front();
 	const bool full();
 	const bool empty();
 	void clear();
 	T top() const;
+	void del(IntVal& v_a);
 	//int size() const;
 	T at(const int i);
 
@@ -88,7 +90,6 @@ protected:
 	int tail_ = 0;
 	int top_;
 };
-
 
 class arc_que
 {

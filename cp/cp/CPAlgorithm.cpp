@@ -281,9 +281,31 @@ void VarList<T>::push_back(T t)
 		nodes_[tail_].next = vid;
 
 	nodes_[vid].data = t;
+	nodes_[vid].absent = Limits::PRESENT;
 	nodes_[vid].prev = tail_;
 	nodes_[vid].next = Limits::INDEX_OVERFLOW;
 	tail_ = vid;
+}
+
+template<class T>
+T VarList<T>::pop_back()
+{
+	--cur_size_;
+	T t = nodes_[tail_].data;
+	nodes_[tail_].absent = Limits::ABSENT;
+	tail_ = nodes_[tail_].prev;
+	nodes_[tail_].next = Limits::INDEX_OVERFLOW;
+	return t;
+}
+
+template<class T>
+T VarList<T>::pop_front()
+{
+	--cur_size_;
+	T t = nodes_[head_].data;
+	nodes_[head_].absent = Limits::ABSENT;
+	head_ = nodes_[head_].next;
+	nodes_[head_].prev = Limits::INDEX_OVERFLOW;
 }
 
 template<class T>
@@ -309,6 +331,23 @@ template<class T>
 T VarList<T>::top() const
 {
 	return nodes_[tail_].data;
+}
+
+void VarList<IntVal>::del(IntVal & v_a)
+{
+	const int vid = v_a.v()->id();
+
+	if (vid == head_)
+		pop_front();
+	else if (vid == tail_)
+		pop_back();
+	else
+	{
+		nodes_[nodes_[vid].next].prev = nodes_[vid].prev;
+		nodes_[nodes_[vid].prev].next = nodes_[vid].next;
+		--cur_size_;
+	}
+
 }
 
 template<class T>
